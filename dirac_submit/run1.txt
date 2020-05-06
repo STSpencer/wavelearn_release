@@ -1,0 +1,8 @@
+ctapipe_dirac_submit.py
+run1.txt
+simtel_writer_dirac.py
+#simtel_writer_dirac.sh#
+simtel_writer_dirac.sh
+#testbash.sh#
+testbash.sh
+testbash.sh~

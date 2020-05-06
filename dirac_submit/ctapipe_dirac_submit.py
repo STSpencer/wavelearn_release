@@ -1,0 +1,168 @@
+from DIRAC.Core.Base import Script
+Script.parseCommandLine()
+from DIRAC.Interfaces.API.Job import Job
+from DIRAC.Interfaces.API.Dirac import Dirac
+import DIRAC
+import sys
+import os
+import numpy as np
+
+def submitWMS(runno,infileList,runstring):
+
+
+    dirac = Dirac()
+    j = Job()
+    j.setType('DataReprocessing')
+    j.setCPUTime(17500000)
+    j.setBannedSites(['LCG.LAPP.fr','LCG.CPPM.fr'])
+    j.setInputSandbox( ['simtel_writer_dirac.sh', 'simtel_writer_dirac.py'] )
+    j.setInputData(infileList)
+    j.setExecutable('./simtel_writer_dirac.sh',arguments='%s %s %s'%(runno[0],runno[1],runno[2]))
+    print('%s %s %s'%(runno[0],runno[1],runno[2]))
+    j.setOutputData("*.hdf5", outputPath='diffuserun1') # This speciefies what is available to download when the job is finished, for example you could just do:
+    #j.setOutputData("*.hdf5", outputPath=out_dir) which would mean that any hdf5 files are saved. Also you set the path here and it goes
+    # from your home directory, i.e. if you set it to  outputPath='test_output' it would be saved at vo.cta.in2p3.fr/user/s/sspencer/test_output
+    j.setName('diffuse_%s_%s_%s' % (str(runno[0]),str(runno[1]),str(runno[2])))
+    j.setOutputSandbox(['*.out', '*.log']) # Added log files to sandbok for debugging
+    res = dirac.submit(j)
+    print('Submission Result: ',res['Value'])
+    return res
+
+def pathconstructor(classlabel,refstr):
+    
+    if classlabel==0:
+        classstr='gamma'
+    elif classlabel==1:
+        classstr='proton'
+    elif classlabel==2:
+        classstr='electron'
+    else:
+        print('Invalid class')
+        raise KeyboardInterrupt
+    
+    breakloc=refstr.index('_')
+    foldindex=str(int(refstr[:breakloc])+1)
+    fileno=refstr[breakloc+1:]
+    if foldindex!='1':
+        path="LFN:/vo.cta.in2p3.fr/user/s/sspencer/sam_sims/simtel_merged/"+classstr+"/run"+fileno+"_merged.simtel.gz"
+    else:
+        path="LFN:/vo.cta.in2p3.fr/user/s/sspencer/sam_sims/simtel_merged/"+classstr+"/run"+fileno+"_merged.simtel.gz"
+    return fileno,foldindex,path
+
+def runnumber(runstr):
+    print(len(runstr))
+    if len(runstr)==22:
+        runno=int(runstr[3:5])
+    elif len(runstr)==21:
+        runno=int(runstr[3])
+    elif len(runstr)==23:
+        runno=int(runstr[3:6])
+    else:
+        print(runstr[-8])
+        print(len(runstr))
+        print(runstr)
+        raise KeyboardInterrupt
+    return runno
+
+def listmaker(listfile):
+    return open(listfile).read().splitlines()
+
+if __name__ == '__main__':
+    cipherlist=[]
+    minfile=0 #First file to load in
+    maxfile=289 #Last file to load in
+    no_gammafiles=1 #No. gamma run folders
+    no_protonfiles=1
+    no_electronfiles=1
+
+    gfilelist=['gamma_list_'+str(i)+'.txt' for i in np.arange(no_gammafiles)]
+    gammalist=[listmaker(gfile) for gfile in gfilelist]
+    gammaref=[]
+    
+    for i in np.arange(len(gammalist)):
+        for j in gammalist[i]:
+            if j[-8]!='h':
+                rno=runnumber(j)
+                gammaref.append(str(i)+'_'+str(rno))
+
+
+    pfilelist=['proton_list_'+str(i)+'.txt' for i in np.arange(no_protonfiles)]
+    protonlist=[listmaker(pfile) for pfile in pfilelist]
+    protonref=[]
+    
+    for i in np.arange(len(protonlist)):
+        for j in protonlist[i]:
+            if j[-8]!='h':
+                rno=runnumber(j)
+                protonref.append(str(i)+'_'+str(rno))
+
+    efilelist=['electron_list_'+str(i)+'.txt' for i in np.arange(no_electronfiles)]
+    electronlist=[listmaker(efile) for efile in efilelist]
+    electronref=[]
+    
+    for i in np.arange(len(electronlist)):
+        for j in electronlist[i]:
+            if j[-8]!='h':
+                rno=runnumber(j)
+                electronref.append(str(i)+'_'+str(rno))
+
+    no_events=[len(gammaref),len(protonref),len(electronref)]
+    minno=min(no_events)
+    
+    gammaref=np.asarray(gammaref[-minno:])
+    protonref=np.asarray(protonref[-minno:])
+    electronref=np.asarray(electronref[-minno:])
+    print(gammaref,protonref,electronref)
+    print(len(gammaref),len(protonref),len(electronref))
+    print(no_events)
+    
+    gind=np.load('gind2.npy')
+    pind=np.load('pind2.npy')
+    eind=np.load('eind2.npy')
+    gammaref=gammaref[gind]
+    protonref=protonref[pind]
+    electronref=electronref[eind]
+
+    failed=0
+    
+    for k in np.arange(minfile,maxfile):
+        if maxfile>minno:
+            print('Not enough files')
+            raise KeyboardInterrupt
+        gammano,gammaind,gammapath=pathconstructor(0,gammaref[k])
+        protonno,protonind,protonpath=pathconstructor(1,protonref[k])
+        electronno,electronind,electronpath=pathconstructor(2,electronref[k])
+        if gammano==protonno or gammano==electronno:
+            failed=failed+1
+            continue
+        #Have if statement to check to runnos the same
+        #Go through all three classes' randomized lists
+        print(failed)
+        runno = [gammano,protonno,electronno] #Check files, I don't think there is actually a run3 in the electron data set
+        runid = str(gammano) + str(protonno) + str(electronno)
+        print(runid)
+        # This will unfortunately be annoying for you... the file names are set automatically for my submission, and if you try to 
+        # download all the run1 files then they will conflict with eachother. May be able to set it up such that the numbers are always unique?
+        # However there is another issue that will come up in simtel_writer_dirac.sh...
+
+        infileList=[]
+        infileList.append(gammapath)
+        infileList.append(protonpath)
+        infileList.append(electronpath)
+        i=0
+        try:
+            print(runid)
+            print('submitting job with files: ', infileList)
+            cipherlist.append(runid)
+            '''
+            res = submitWMS(runno, infileList,runid)
+            if not res['OK']:
+                DIRAC.gLogger.error(res['Message'])
+                DIRAC.exit(-1)
+            else:
+                DIRAC.gLogger.notice(res['Value'])'''
+        except Exception:
+            DIRAC.gLogger.exception()
+            DIRAC.exit(-1)
+    cipherlist=np.asarray(cipherlist)
+    np.save('cipher.npy',cipherlist)

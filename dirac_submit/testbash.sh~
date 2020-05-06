@@ -1,0 +1,4 @@
+#!/bin/sh
+
+RUNSTRING=$0
+echo $RUNSTRING

@@ -1,0 +1,79 @@
+from DIRAC.Core.Base import Script
+Script.parseCommandLine()
+from DIRAC.Interfaces.API.Job import Job
+from DIRAC.Interfaces.API.Dirac import Dirac
+import DIRAC
+import sys
+import os
+import numpy as np
+
+def submitWMS(runno,infileList,runstring):
+
+
+    dirac = Dirac()
+    j = Job()
+    j.setType('DataReprocessing')
+    j.setCPUTime(17500000)
+    j.setBannedSites(['LCG.LAPP.fr'])
+    j.setInputSandbox( ['simtel_writer_dirac.sh', 'simtel_writer_dirac.py'] )
+    j.setInputData(infileList)
+    j.setExecutable('./simtel_writer_dirac.sh',arguments='%s %s %s'%(runno[0],runno[1],runno[2]))
+    print('%s %s %s'%(runno[0],runno[1],runno[2]))
+    j.setOutputData("*.hdf5", outputPath='pointrun3') # This speciefies what is available to download when the job is finished, for example you could just do:
+    #j.setOutputData("*.hdf5", outputPath=out_dir) which would mean that any hdf5 files are saved. Also you set the path here and it goes
+    # from your home directory, i.e. if you set it to  outputPath='test_output' it would be saved at vo.cta.in2p3.fr/user/s/sspencer/test_output
+    j.setName('ctapipe_%s_%s_%s' % (str(runno[0]),str(runno[1]),str(runno[2])))
+    j.setOutputSandbox(['*.out', '*.log']) # Added log files to sandbok for debugging
+    res = dirac.submit(j)
+    print('Submission Result: ',res['Value'])
+    return res
+
+def pathconstructor2(classlabel,refno):
+    
+    if classlabel==0:
+        classstr='gamma'
+    elif classlabel==1:
+        classstr='proton'
+    elif classlabel==2:
+        classstr='electron'
+    else:
+        print('Invalid class')
+        raise KeyboardInterrupt
+
+    fileno=str(refno)
+    path="LFN:/vo.cta.in2p3.fr/user/s/sspencer/sam_sims/simtel_merged/"+classstr+"/run"+fileno+"_merged.simtel.gz"
+    return path
+
+
+def listmaker(listfile):
+    return open(listfile).read().splitlines()
+
+if __name__ == '__main__':
+    gammano=sys.argv[1]
+    protonno=sys.argv[2]
+    electronno=sys.argv[3]
+
+    runno = [gammano,protonno,electronno] #Check files, I don't think there is actually a run3 in the electron data set
+    runid = str(gammano) + str(protonno) + str(electronno)
+    print(runid)
+
+    infileList=[]
+    gammapath=pathconstructor2(0,gammano)
+    protonpath=pathconstructor2(1,protonno)
+    electronpath=pathconstructor2(2,electronno)
+    infileList.append(gammapath)
+    infileList.append(protonpath)
+    infileList.append(electronpath)
+    try:
+        print(runid)
+        print('submitting job with files: ', infileList)
+
+        '''res = submitWMS(runno, infileList,runid)
+        if not res['OK']:
+            DIRAC.gLogger.error(res['Message'])
+            DIRAC.exit(-1)
+        else:
+            DIRAC.gLogger.notice(res['Value'])'''
+    except Exception:
+        DIRAC.gLogger.exception()
+        DIRAC.exit(-1)
