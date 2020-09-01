@@ -11,6 +11,14 @@ chargesums2=[]
 cutsums2=[]
 count=0
 count2=0
+import matplotlib.ticker as mtick
+def div_5(x, *args):
+    """
+    The function that will you be applied to your y-axis ticks.
+    """
+    x = float(x)/5.0
+    return "{:.1f}".format(x)
+
 bins=np.linspace(10**5.5,10**8)
 for file in onlyfiles:
     count=count+1
@@ -19,7 +27,6 @@ for file in onlyfiles:
     chargearr = np.asarray(inputdata['squared_training'][:, :, :, :])
     evlabels=np.asarray(inputdata['event_label'][:])
     for i in np.arange(np.shape(chargearr)[0]):
-        '''
         print(evlabels[i])
         plt.imshow(chargearr[i,0,:,:])
         #Center region crop
@@ -27,8 +34,8 @@ for file in onlyfiles:
         plt.hlines(40,8,40,colors='r')
         plt.vlines(8,8,40,colors='r')
         plt.vlines(40,8,40,colors='r')
-        plt.xlabel('x (Pixels)',size='large')
-        plt.ylabel('y (Pixels)',size='large')'''
+        plt.xlabel('x Angular Size on Sky ($^\circ$)',size='large')
+        plt.ylabel('y Angular Size on Sky ($^\circ$)',size='large')
         '''
         plt.hlines(8,0,8,colors='b')
         plt.hlines(8,40,47,colors='b')
@@ -38,6 +45,11 @@ for file in onlyfiles:
         plt.vlines(8,40,47,colors='b')
         plt.vlines(40,0,8,colors='b')
         plt.vlines(40,40,47,colors='b')'''
+        ax = plt.gca()       
+        ax.yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
+        ax.xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
+        cb=plt.colorbar()
+        cb.set_label('Charge (Relative Units)',size='large')
         plt.show()
         chargesums.append(np.sum(chargearr[i,:,:,:]))
         cutsums.append(np.sum(chargearr[i,:,8:40,8:40]))
