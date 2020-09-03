@@ -6,6 +6,6 @@ The folder dirac_submit contains scripts to submit the .simtel.gz to hdf5 conver
 
 paramlstm.py is the main CRNN training script where the network architecture is defined. Note that numerous aspects are hardcoded, such as compatibility only with CHEC prod3b simulations. net_utils.py contains plotting and data generation functions needed for paramlstm.py. Separation of files into training/testing/validation data is performed by a cut on a filelist that must be the same in both paramlstm.py and net_utils.py. The different methods in the paper are implemented by changing the elements of the array ta2 and by changing the network input size in paramlstm.py as required. 
 
-The folder Models contains pre-trained hdf5 models for the methods presented in the paper.
+The folder Models contains pre-trained hdf5 models for the methods presented in the paper, and the folder fprtpr contains calculated fpr and tpr values for recreating ROC curves.
 
 plotmaker.py, abelardo.py, chargechecker.py and acclossplotter.py are helper scripts to recreate the plots in the paper.
