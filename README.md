@@ -9,3 +9,5 @@ paramlstm.py is the main CRNN training script where the network architecture is 
 The folder Models contains pre-trained hdf5 models for the methods presented in the paper, and the folder fprtpr contains calculated fpr and tpr values for recreating ROC curves.
 
 plotmaker.py, abelardo.py, chargechecker.py and acclossplotter.py are helper scripts to recreate the plots in the paper.
+
+Figures showing complete confusion matricies for the eight training runs in the paper can be found in additionalfigures.
