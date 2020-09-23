@@ -13,9 +13,9 @@ def div_5(x, *args):
     """
     x = float(x)/5.0
     return "{:.1f}".format(x)
-
+lpv=15
  #Event to plot
-file='/store/spencers/Data/pointrun3/265260186.hdf5'
+file='/mnt/extraspace/exet4487/pointrun3/265260186.hdf5'
 inputdata = h5py.File(file, 'r')
 trainarr = np.asarray(inputdata['peak_times'][:, :, :, :])
 trainarr = trainarr[:, :, 8:40, 8:40]
@@ -52,13 +52,14 @@ fig,axes=plt.subplots(nrows=2,ncols=4,figsize=(16,8))
 # Code to plot waveform parameters.
 print(labelsarr[eventno],energy[eventno])
 squared=chargearr[eventno,0,:,:,0]
+squared=0.01525723*squared-6.20419852
 im=axes[0,0].imshow(squared)
 axes[0,0].set_title('Charge',size='x-large')
 axes[0,0].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[0,0].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 #axes[0,0].axis('off')
 cbar=fig.colorbar(im,ax=axes[0,0],fraction=0.046, pad=0.04)
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (p.e.)', rotation=270,labelpad=lpv,size='x-large')
 ptimes=trainarr[eventno,0,:,:,0]
 im=axes[0,1].imshow(ptimes)
 axes[0,1].set_title('Peak Time',size='x-large')
@@ -66,31 +67,36 @@ axes[0,1].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[0,1].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 #axes[0,1].axis('off')
 cbar=fig.colorbar(im,ax=axes[0,1],fraction=0.046, pad=0.04)
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Sample)', rotation=270,labelpad=lpv,size='x-large')
 meanmat=meanarr[eventno,0,:,:,0]
+meanmat=0.01525723*meanmat
 im=axes[0,2].imshow(meanmat)
 axes[0,2].set_title('Mean Amplitude',size='x-large')
 axes[0,2].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[0,2].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 #axes[0,2].axis('off')
 cbar=fig.colorbar(im,ax=axes[0,2],fraction=0.046, pad=0.04)
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Sample/p.e.)', rotation=270,labelpad=lpv,size='x-large')
 ampmat=amparr[eventno,0,:,:,0]
+ampmat=0.01525723*ampmat
+
 im=axes[0,3].imshow(ampmat)
 axes[0,3].set_title('Peak Amplitude',size='x-large')
 #axes[0,3].axis('off')
 axes[0,3].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[0,3].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 cbar=fig.colorbar(im,ax=axes[0,3],fraction=0.046, pad=0.04)    
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Sample/p.e.)', rotation=270,labelpad=lpv,size='x-large')
 rmsmat=rmsarr[eventno,0,:,:,0]
+rmsmat=0.01525723*rmsmat
+
 im=axes[1,0].imshow(rmsmat)
 axes[1,0].set_title('RMS',size='x-large')
 #axes[1,0].axis('off')
 axes[1,0].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[1,0].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 cbar=fig.colorbar(im,ax=axes[1,0],fraction=0.046, pad=0.04)
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Sample/p.e.)', rotation=270,labelpad=lpv,size='x-large')
 fwhmmat=fwhmarr[eventno,0,:,:,0]
 im=axes[1,1].imshow(fwhmmat)
 axes[1,1].set_title('FWHM',size='x-large')
@@ -98,7 +104,7 @@ axes[1,1].set_title('FWHM',size='x-large')
 axes[1,1].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[1,1].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 cbar=fig.colorbar(im,ax=axes[1,1],fraction=0.046, pad=0.04)
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Samples)', rotation=270,labelpad=lpv,size='x-large')
 rtmat=rtarr[eventno,0,:,:,0]
 im=axes[1,2].imshow(rtmat)
 axes[1,2].set_title('RT',size='x-large')
@@ -106,13 +112,13 @@ axes[1,2].set_title('RT',size='x-large')
 axes[1,2].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[1,2].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 cbar=fig.colorbar(im,ax=axes[1,2],fraction=0.046, pad=0.04)
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Samples)', rotation=270,labelpad=lpv,size='x-large')
 ftmat=ftarr[eventno,0,:,:,0]
 im=axes[1,3].imshow(ftmat)
 axes[1,3].set_title('FT',size='x-large')
 cbar=fig.colorbar(im,ax=axes[1,3],fraction=0.046, pad=0.04)
 #axes[1,3].axis('off')
-#cbar.ax.set_ylabel('Value (Relative Units)', rotation=270)
+cbar.ax.set_ylabel('Value (Samples)', rotation=270,labelpad=lpv,size='x-large')
 axes[1,3].yaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 axes[1,3].xaxis.set_major_formatter(mtick.FuncFormatter(div_5))
 for i, row in enumerate(axes):
@@ -122,8 +128,8 @@ for i, row in enumerate(axes):
         if j == 0:
             cell.set_ylabel("Angular Size ($^\circ$)".format(i + 1),size='x-large')
 
-plt.tight_layout(0.5)
+plt.tight_layout(0.8)
 #plt.subplots_adjust(hspace=0.35,
  #                   wspace=0.6)
 
-plt.savefig('56tgamma2.png')
+plt.savefig('56tgamma3.png')
