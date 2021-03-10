@@ -10,6 +10,6 @@ paramlstm.py is the main Convlstm training script where the network architecture
 
 The folder Models contains pre-trained hdf5 models for the methods presented in the paper, and the folder fprtpr contains calculated fpr and tpr values for recreating ROC curves.
 
-plotmaker.py, abelardo.py, chargechecker.py, modhyp.py, accES.py and acclossplotter.py are helper scripts to recreate the plots in the paper.
+plotmaker.py, abd.py, chargechecker.py, modhyp.py, accES.py and acclossplotter.py are helper scripts to recreate the plots in the paper.
 
 Figures showing complete confusion matricies for the eight original training runs in the paper can be found in the folder additionalfigures.
